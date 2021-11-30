@@ -1,21 +1,27 @@
-import { useContext, useState } from "react";
-import { UserContext } from "../../context/userContext";
-import { useHistory } from "react-router-dom";
-import { Alert } from "react-bootstrap";
+import { useContext, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { Alert } from 'react-bootstrap';
+
+import { UserContext } from '../../context/userContext';
 
 // Get API config here ...
+import { API } from '../../config/api';
 
 export default function Login() {
   let history = useHistory();
 
-  const title = "Login";
-  document.title = "DumbMerch | " + title;
+  const title = 'Login';
+  document.title = 'DumbMerch | ' + title;
 
   const [state, dispatch] = useContext(UserContext);
 
   const [message, setMessage] = useState(null);
-  
+
   // Store data with useState here ...
+  const [form, setForm] = useState({
+    email: '',
+    password: '',
+  });
 
   const { email, password } = form;
 
@@ -32,24 +38,33 @@ export default function Login() {
 
       // Create Configuration Content-type here ...
       // Content-type: application/json
+      const config = {
+        headers: {
+          'Content-type': 'application/json',
+        },
+      };
 
       // Convert form data to string here ...
+      const body = JSON.stringify(form);
 
       // Insert data user for login process here ...
+      const response = await API.post('/login', body, config);
 
       // Checking process
       if (response?.status == 200) {
         // Send data to useContext
         dispatch({
-          type: "LOGIN_SUCCESS",
+          type: 'LOGIN_SUCCESS',
           payload: response.data.data,
         });
 
-        // Status check
-        if (response.data.data.status == "admin") {
-          history.push("/complain-admin");
+        console.log(state);
+
+        // // Status check
+        if (response.data.data.status == 'admin') {
+          history.push('/complain-admin');
         } else {
-          history.push("/");
+          history.push('/');
         }
 
         const alert = (
@@ -74,7 +89,7 @@ export default function Login() {
     <div className="d-flex justify-content-center">
       <div className="card-auth p-4">
         <div
-          style={{ fontSize: "36px", lineHeight: "49px", fontWeight: "700" }}
+          style={{ fontSize: '36px', lineHeight: '49px', fontWeight: '700' }}
           className="mb-3"
         >
           Login
