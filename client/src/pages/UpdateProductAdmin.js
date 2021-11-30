@@ -1,17 +1,18 @@
-import React, { useState, useEffect, createElement } from "react";
-import { Container, Row, Col, Button } from "react-bootstrap";
-import { useParams, useHistory } from "react-router";
+import React, { useState, useEffect, createElement } from 'react';
+import { Container, Row, Col, Button } from 'react-bootstrap';
+import { useParams, useHistory } from 'react-router';
 
-import NavbarAdmin from "../components/NavbarAdmin";
-import CheckBox from "../components/form/CheckBox";
+import NavbarAdmin from '../components/NavbarAdmin';
+import CheckBox from '../components/form/CheckBox';
 
-import dataProduct from "../fakeData/product";
+import dataProduct from '../fakeData/product';
 
 // Get API config here ...
+import { API } from '../config/api';
 
 export default function UpdateProductAdmin() {
-  const title = "Product admin";
-  document.title = "DumbMerch | " + title;
+  const title = 'Product admin';
+  document.title = 'DumbMerch | ' + title;
 
   let history = useHistory();
   const { id } = useParams();
@@ -22,18 +23,97 @@ export default function UpdateProductAdmin() {
   const [product, setProduct] = useState({}); //Store product data
 
   // Create Variabel for store product data here ...
+  const [form, setForm] = useState({
+    image: '',
+    name: '',
+    desc: '',
+    price: '',
+    qty: '',
+  }); //Store product data
 
   // Create function get product data by id from database here ...
+  const getProduct = async (id) => {
+    try {
+      const response = await API.get('/product/' + id);
+      // Store product data to useState variabel
+      setPreview(response.data.data.image);
+      setForm({
+        ...form,
+        name: response.data.data.name,
+        desc: response.data.data.desc,
+        price: response.data.data.price,
+        qty: response.data.data.qty,
+      });
+      setProduct(response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   // Create function get category data by id from database here ...
 
   // Call function get product with useEffect didMount here ...
   // Call function get category with useEffect didMount here ...
+  useEffect(() => {
+    // getCategories();
+    getProduct(id);
+  }, []);
 
   // Create function for handle if category selected here ...
 
   // Create function for handle change data on form here ...
+  // Handle change data on form
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]:
+        e.target.type === 'file' ? e.target.files : e.target.value,
+    });
+
+    // Create image url for preview
+    if (e.target.type === 'file') {
+      let url = URL.createObjectURL(e.target.files[0]);
+      setPreview(url);
+    }
+  };
 
   // Create function for handle submit data ...
+  const handleSubmit = async (e) => {
+    try {
+      e.preventDefault();
+
+      // Configuration
+      const config = {
+        headers: {
+          'Content-type': 'multipart/form-data',
+        },
+      };
+
+      // Store data with FormData as object
+      const formData = new FormData();
+      if (form.image) {
+        formData.set('image', form?.image[0], form?.image[0]?.name);
+      }
+      formData.set('name', form.name);
+      formData.set('desc', form.desc);
+      formData.set('price', form.price);
+      formData.set('qty', form.qty);
+      // formData.set("categoryId", categoryId);
+
+      // Insert product data
+      const response = await API.patch(
+        `/product/${product.id}`,
+        formData,
+        config
+      );
+      console.log(response.data);
+
+      history.push('/product-admin');
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleChangeCategoryId = () => {};
 
   // Get category id selected
   useEffect(() => {
@@ -59,9 +139,9 @@ export default function UpdateProductAdmin() {
                   <img
                     src={preview}
                     style={{
-                      maxWidth: "150px",
-                      maxHeight: "150px",
-                      objectFit: "cover",
+                      maxWidth: '150px',
+                      maxHeight: '150px',
+                      objectFit: 'cover',
                     }}
                   />
                 </div>
@@ -90,7 +170,7 @@ export default function UpdateProductAdmin() {
                 onChange={handleChange}
                 value={form.desc}
                 className="input-edit-category mt-4"
-                style={{ height: "130px" }}
+                style={{ height: '130px' }}
               ></textarea>
               <input
                 type="number"
@@ -112,7 +192,7 @@ export default function UpdateProductAdmin() {
               <div className="card-form-input mt-4 px-2 py-1 pb-2">
                 <div
                   className="text-secondary mb-1"
-                  style={{ fontSize: "15px" }}
+                  style={{ fontSize: '15px' }}
                 >
                   Category
                 </div>
