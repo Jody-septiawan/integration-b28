@@ -1,26 +1,39 @@
-import { useContext, useState, useEffect } from "react";
-import { useHistory } from "react-router-dom";
-import Masonry from "react-masonry-css";
-import { Container, Row, Col } from "react-bootstrap";
+import { useContext, useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
+import Masonry from 'react-masonry-css';
+import { Container, Row, Col } from 'react-bootstrap';
 
-import { UserContext } from "../context/userContext";
+import { UserContext } from '../context/userContext';
 
-import Navbar from "../components/Navbar";
-import ProductCard from "../components/card/ProductCard";
+import Navbar from '../components/Navbar';
+import ProductCard from '../components/card/ProductCard';
 
-import imgEmpty from "../assets/empty.svg";
+import imgEmpty from '../assets/empty.svg';
 
 // Get API config here ...
+import { API } from '../config/api';
 
 export default function Product() {
-  const title = "Shop";
-  document.title = "DumbMerch | " + title;
+  const title = 'Shop';
+  document.title = 'DumbMerch | ' + title;
 
   // Create Variabel for store product data here ...
+  const [products, setProducts] = useState([]);
 
-  // Create function get products data from database here ...
+  // Fetching product data from database
+  const getProducts = async () => {
+    try {
+      const response = await API.get('/products');
+      // Store product data to useState variabel
+      setProducts(response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-  // Call function get products with useEffect didMount here ...
+  useEffect(() => {
+    getProducts();
+  }, []);
 
   const breakpointColumnsObj = {
     default: 6,
@@ -52,7 +65,12 @@ export default function Product() {
           ) : (
             <Col>
               <div className="text-center pt-5">
-                <img src={imgEmpty} className="img-fluid" style={{ width: "40%" }} alt="empty" />
+                <img
+                  src={imgEmpty}
+                  className="img-fluid"
+                  style={{ width: '40%' }}
+                  alt="empty"
+                />
                 <div className="mt-3">No data product</div>
               </div>
             </Col>
